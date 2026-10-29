@@ -54,13 +54,16 @@ Sonarr zählt nach TVDB, AniDB führt jede Staffel als eigene Serie mit eigener 
    Claude die Serie neu von AniDB laden lassen (höchstens alle 12 Stunden pro Serie).
 3. Claude meldet Folge, Sicherheit und Begründung. **Zugeordnet wird nur bei Sicherheit „hoch“**,
    alles andere landet in `/var/lib/shoko-zuordnung/offen.json` und wird nach 6 Stunden erneut
-   geprüft. Eine falsche Zuordnung ist schlimmer als keine.
+   geprüft, höchstens 4-mal pro Datei (danach bleibt sie in `offen.json` für die Zuordnung von Hand).
+   Verknüpft werden nur Folgen, die Claude vorher in Shoko angezeigt wurden. Eine falsche Zuordnung
+   ist schlimmer als keine.
 4. Nach einer Zuordnung lässt das Skript die betroffene Serie in Jellyfin neu einlesen
    (Shokofin bekommt Zuordnungen über SignalR nicht immer mit). Ist die Serie in Jellyfin noch
    unbekannt, wird die Shokofin-Bibliothek eingelesen.
 
 Von der neuen Datei bis Jellyfin dauert es so etwa 30–45 Minuten. Kosten: ein paar Cent pro
-unerkannter Datei (Modell `claude-opus-5-5`).
+unerkannter Datei (Modell `claude-opus-5-5`). Kostenbremse (Konstanten oben im Skript): höchstens
+10 Dateien pro Lauf, 12 Werkzeugrunden pro Datei und 3 AniDB-Aktualisierungen pro Lauf.
 
 ### Einrichten
 

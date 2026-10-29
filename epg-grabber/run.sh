@@ -7,16 +7,16 @@ if [ ! -d node_modules ]; then
 fi
 while true; do
   rm -f /work/magenta.tmp.xml
-  # nur 1 Verbindung: mit 3 drosselt MagentaTV und liefert leere Sender-Tage
   if npm run grab --- --channels=/work/magenta.channels.xml --days=14 --maxConnections=1 \
        --output=/work/magenta.tmp.xml > /work/grab-letzter-lauf.log 2>&1 && [ -s /work/magenta.tmp.xml ]; then
     # nur aktualisieren: leere Sender-Tage aus dem letzten Stand übernehmen
     if [ -s /work/magenta.xml ] && node /work/merge.mjs /work/magenta.xml /work/magenta.tmp.xml /work/magenta.merged.xml >> /work/grab-letzter-lauf.log 2>&1; then
       mv /work/magenta.merged.xml /work/magenta.tmp.xml
     fi
-    neu=$(grep -c '<programme' /work/magenta.tmp.xml); alt=$(grep -c '<programme' /work/magenta.xml 2>/dev/null || echo 0)
+    # grep -c gibt bei 0 Treffern Exit 1, "|| echo 0" ergäbe dann "0<Zeilenumbruch>0" und beendet sh -> wc -l
+    neu=$(grep -o '<programme' /work/magenta.tmp.xml | wc -l); alt=$(grep -o '<programme' /work/magenta.xml 2>/dev/null | wc -l)
     # MagentaTV liefert bei Drosselung leere Tage: deutlich kleinere Ergebnisse nicht übernehmen
-    if [ "$neu" -lt $((alt * 8 / 10)) ]; then
+    if [ "$neu" -eq 0 ] || [ "$neu" -lt $((alt * 8 / 10)) ]; then
       echo "$(date '+%F %T') VERWORFEN: nur $neu statt $alt Sendungen - letzte Datei bleibt" >> /work/grab.log
     else
       mv /work/magenta.tmp.xml /work/magenta.xml
