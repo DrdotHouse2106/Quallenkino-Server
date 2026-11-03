@@ -2,8 +2,13 @@
 
 ## Updates
 
-[`scripts/update_docker.sh`](../scripts/update_docker.sh) zieht neue Images (mit Wiederholung,
-höchstens 2 parallel wegen Rate-Limits), startet geänderte Container neu und räumt alte Images auf.
+[`scripts/update_docker.sh`](../scripts/update_docker.sh) zieht neue Images, startet geänderte
+Container neu und räumt alte Images auf. Höchstens 2 Images werden parallel geladen (Rate-Limits).
+Schlägt der Download fehl, versucht es das Skript bis zu 8 Mal über knapp eine Stunde. Danach
+schickt es auf Wunsch eine Push-Meldung über ntfy (`NTFY_URL`, optional `NTFY_TOKEN` setzen).
+
+Die linuxserver-Images kommen direkt von `ghcr.io/linuxserver/…`. `lscr.io` leitet nur dorthin
+weiter und war bei uns zeitweise nicht erreichbar (TLS-Timeout); die Images sind identisch.
 
 ```
 0 4 * * 0 /opt/media-stack/scripts/update_docker.sh >> /opt/media-stack/update_docker.log 2>&1
