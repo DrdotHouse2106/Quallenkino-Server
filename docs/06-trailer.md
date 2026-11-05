@@ -12,3 +12,7 @@ ohne Werbung, ohne YouTube-Sperren, auch auf Geräten ohne YouTube.
 5. Wartezeit zwischen Downloads nicht zu klein wählen (z. B. 10 Minuten), sonst sperrt YouTube.
 
 Anime: siehe [04-anime.md](04-anime.md#anime-trailer-optional).
+
+`scripts/anime-trailer/anime_trailer_link.py` nimmt den Jellyfin-API-Schlüssel aus
+`/root/.config/anime-trailer/jellyfin-key` (Dashboard → API-Schlüssel; Pfad über
+`JELLYFIN_KEY_FILE` änderbar).

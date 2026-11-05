@@ -63,8 +63,12 @@ cd .. && docker compose up -d epg-grabber
 vor dem EPG-Sync des m3u-editors:
 
 ```
-50 3,9,15,21 * * * /usr/bin/python3 /opt/media-stack/scripts/epg-enrich/enrich_epg.py --out /opt/media-stack/config/m3u-editor/storage/epg/epg_DE1_enriched.xml.gz >> /opt/media-stack/scripts/epg-enrich/enrich.log 2>&1
+50 3,9,15,21 * * * /usr/sbin/runuser -u epg-enrich -- /usr/bin/python3 /opt/media-stack/scripts/epg-enrich/enrich_epg.py --out /opt/media-stack/config/m3u-editor/storage/epg/epg_DE1_enriched.xml.gz >> /opt/media-stack/scripts/epg-enrich/enrich.log 2>&1
 ```
+
+Das Skript läuft nicht als root. Einmalig anlegen:
+`useradd --system --no-create-home --shell /usr/sbin/nologin epg-enrich` und
+`chown -R epg-enrich: config/m3u-editor/storage/epg`.
 
 - Lädt epgshare01 DE1 und ersetzt für jeden Sender mit MagentaTV-Daten dessen Sendungen
   (doppelte entfernt). Sender ohne MagentaTV bleiben bei DE1.

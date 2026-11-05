@@ -11,7 +11,26 @@ melden() {
         -H "Title: $1" -H "Priority: 4" -H "Tags: warning" -d "$2" "$NTFY_URL"
 }
 
+# Rückweg: Das laufende Image jedes Dienstes als rollback/<dienst>:vorher merken (eine Generation).
+# Zurück mit: update_docker.sh --zurueck <dienst>. Datenbanken werden dabei nicht zurückgedreht.
+images_merken() {
+    local dienst c
+    for dienst in $(docker compose config --services); do
+        c=$(docker compose ps -q "$dienst" 2>/dev/null | head -1)
+        [ -n "$c" ] && docker tag "$(docker inspect -f "{{.Image}}" "$c")" "rollback/$dienst:vorher"
+    done
+}
+
+if [ "$1" = "--zurueck" ]; then
+    docker image inspect "rollback/$2:vorher" > /dev/null 2>&1 || { echo "Kein gemerktes Image für $2"; exit 1; }
+    docker tag "rollback/$2:vorher" "$(docker compose config --images "$2")"
+    docker compose up -d --no-build "$2"
+    exit 0
+fi
+
 echo "=== $(date) ==="
+
+images_merken
 
 # Docker-Bilder aktualisieren. Ist eine Registry kurz weg (z. B. TLS-Timeout),
 # bis zu 8 Versuche über knapp eine Stunde; danach Push-Meldung und mit dem weiter, was da ist.
@@ -28,6 +47,15 @@ done
 
 # Container neu starten
 docker compose up -d
+
+# Läuft nach dem Update etwas nicht? Dann melden.
+sleep 180
+kaputt=$(docker ps -a --filter status=exited --filter status=restarting --format "{{.Names}}"; docker ps --filter health=unhealthy --format "{{.Names}}")
+kaputt=$(echo "$kaputt" | sort -u | tr "\n" " ")
+if [ -n "${kaputt// /}" ]; then
+    echo "Nach dem Update nicht gesund: $kaputt"
+    melden "Container nach Update nicht gesund" "$kaputt - zurueck mit: update_docker.sh --zurueck <dienst>"
+fi
 
 # Unnötigen Datenmüll entfernen
 docker image prune -f

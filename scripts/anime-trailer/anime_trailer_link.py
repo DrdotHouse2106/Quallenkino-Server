@@ -24,7 +24,7 @@ from collections import defaultdict
 STACK = os.environ.get("STACK_DIR", "/opt/media-stack")
 BASE = os.path.join(STACK, "scripts/anime-trailer")
 TRAILARR_DB = os.path.join(STACK, "config/trailarr/trailarr.db")
-JELLYFIN_DB = os.path.join(STACK, "config/jellyfin/data/data/jellyfin.db")
+JELLYFIN_KEY_FILE = os.environ.get("JELLYFIN_KEY_FILE", "/root/.config/anime-trailer/jellyfin-key")  # Dashboard → API-Schlüssel
 VFS_HOST = os.path.join(STACK, "config/jellyfin/data/Shokofin/VFS")
 VFS_CONTAINER = "/config/data/Shokofin/VFS"
 ANIME_ROOT = os.environ.get("ANIME_ROOT", "/anime/")              # Anime-Ordner, wie Trailarr ihn sieht
@@ -107,9 +107,8 @@ def trailarr_downloads():
 
 
 def jellyfin_request(path, method="GET"):
-    con = sqlite3.connect(f"file:{JELLYFIN_DB}?mode=ro", uri=True)
-    token = con.execute("select AccessToken from ApiKeys limit 1").fetchone()[0]
-    con.close()
+    with open(JELLYFIN_KEY_FILE) as f:
+        token = f.read().strip()
     req = urllib.request.Request(JELLYFIN + path, method=method,
                                  headers={"Authorization": f'MediaBrowser Token="{token}"'})
     body = urllib.request.urlopen(req, timeout=60).read()

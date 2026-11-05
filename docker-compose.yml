@@ -224,11 +224,13 @@ services:
     <<: *common
     image: redis:alpine
     container_name: m3u-redis
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD}
     volumes:
       - ./config/m3u-editor/redis-data:/data
     command: redis-server --port 6379 --requirepass ${REDIS_PASSWORD} --appendonly no --save "" --maxmemory 256mb --maxmemory-policy allkeys-lru --loglevel warning
     healthcheck:
-      test: ["CMD", "redis-cli", "-p", "6379", "-a", "${REDIS_PASSWORD}", "ping"]
+      test: ["CMD", "redis-cli", "-p", "6379", "ping"]
       interval: 10s
       timeout: 5s
       retries: 3
@@ -243,6 +245,7 @@ services:
     command: sh /work/run.sh
     volumes:
       - ./epg-grabber:/work
+      - ./epg-grabber/run.sh:/work/run.sh:ro  # der Container darf sein eigenes Startskript nicht ändern
 
   # ───────────── Musik, Hörbücher, Bücher, YouTube ─────────────
   navidrome:

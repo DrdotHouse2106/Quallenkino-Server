@@ -18,6 +18,7 @@ Darsteller" direkt lesen.
 """
 import argparse
 import gzip
+import io
 import os
 import re
 import sys
@@ -32,6 +33,8 @@ SOURCE_URL = "https://epgshare01.online/epgshare01/epg_ripper_DE1.xml.gz"
 MERGE_FILE = os.environ.get("EPG_MERGE_FILE", "/opt/media-stack/epg-grabber/magenta.xml")
 MERGE_MAX_AGE_H = 48
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) mediastack-epg-enrich/1.0"
+MAX_DOWNLOAD = 200 * 1024 * 1024
+MAX_ENTPACKT = 2 * 1024 * 1024 * 1024
 
 # Stadion (Teilstring der Beschreibung) -> Suchwort fuer die Heimmannschaft
 STADIUMS = {
@@ -184,8 +187,19 @@ def merge(root, merge_file):
 def main(source_url, out_file, merge_file=MERGE_FILE):
     req = urllib.request.Request(source_url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(req, timeout=180) as r:
-        raw = r.read()
-    data = gzip.decompress(raw) if raw[:2] == b"\x1f\x8b" else raw
+        raw = r.read(MAX_DOWNLOAD + 1)
+    if len(raw) > MAX_DOWNLOAD:
+        raise ValueError(f"Download größer als {MAX_DOWNLOAD} Bytes")
+    if raw[:2] == b"\x1f\x8b":
+        with gzip.GzipFile(fileobj=io.BytesIO(raw)) as g:
+            data = g.read(MAX_ENTPACKT + 1)
+        if len(data) > MAX_ENTPACKT:
+            raise ValueError(f"Entpackt größer als {MAX_ENTPACKT} Bytes")
+    else:
+        data = raw
+    # XMLTV braucht keine eigenen Entities, so kann eine fremde Datei den Parser nicht aufblähen
+    if b"<!ENTITY" in data[:65536]:
+        raise ValueError("XML mit ENTITY-Definition abgelehnt")
     root = ET.fromstring(data)
     merged = merge(root, merge_file)
 

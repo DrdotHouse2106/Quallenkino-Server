@@ -10,6 +10,11 @@ schickt es auf Wunsch eine Push-Meldung über ntfy (`NTFY_URL`, optional `NTFY_T
 Die linuxserver-Images kommen direkt von `ghcr.io/linuxserver/…`. `lscr.io` leitet nur dorthin
 weiter und war bei uns zeitweise nicht erreichbar (TLS-Timeout); die Images sind identisch.
 
+**Rückweg:** Vor jedem Update merkt sich das Skript das laufende Image als
+`rollback/<dienst>:vorher`. Macht ein Update etwas kaputt, reicht
+`scripts/update_docker.sh --zurueck sonarr`. Datenbanken werden dabei nicht zurückgedreht. Ist nach
+dem Update ein Container nicht gesund, kommt eine ntfy-Meldung, wenn `NTFY_URL` gesetzt ist.
+
 ```
 0 4 * * 0 /opt/media-stack/scripts/update_docker.sh >> /opt/media-stack/update_docker.log 2>&1
 ```

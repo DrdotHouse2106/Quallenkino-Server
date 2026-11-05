@@ -62,8 +62,13 @@ Sonarr zählt nach TVDB, AniDB führt jede Staffel als eigene Serie mit eigener 
    unbekannt, wird die Shokofin-Bibliothek eingelesen.
 
 Von der neuen Datei bis Jellyfin dauert es so etwa 30–45 Minuten. Kosten: ein paar Cent pro
-unerkannter Datei (Modell `claude-opus-5-5`). Kostenbremse (Konstanten oben im Skript): höchstens
-10 Dateien pro Lauf, 12 Werkzeugrunden pro Datei und 3 AniDB-Aktualisierungen pro Lauf.
+Claude-Anfrage (Modell `claude-sonnet-5-5`). Vor Claude greift eine **Regel ohne Kosten**: Sind die
+Nachbarfolgen im selben Ordner schon einer AniDB-Serie mit fester Zählung zugeordnet (auch alte,
+nicht mehr vorhandene Dateien, etwa nach einem Bluray-Upgrade), bekommt die Datei die Folge mit
+derselben Verschiebung. Fehlt diese Folge bei AniDB noch, wartet das Skript bis zu 7 Tage, statt zu
+fragen. Claude kommt nur noch bei Specials, geteilten Staffeln oder schon belegten Folgen dran.
+Kostenbremse (Konstanten oben im Skript): höchstens 10 Claude-Anfragen pro Lauf und 40 pro Tag,
+12 Werkzeugrunden pro Datei und 3 AniDB-Aktualisierungen pro Lauf.
 
 ### Einrichten
 
@@ -71,13 +76,18 @@ unerkannter Datei (Modell `claude-opus-5-5`). Kostenbremse (Konstanten oben im S
 apt install python3-venv
 mkdir -p /opt/media-stack/shoko-zuordnung && cp scripts/shoko-zuordnung/zuordnen.py /opt/media-stack/shoko-zuordnung/
 cd /opt/media-stack/shoko-zuordnung && python3 -m venv venv && venv/bin/pip install anthropic
+venv/bin/pip freeze > requirements.lock   # Stand festhalten
 
-# Schlüssel (nur für root lesbar)
-install -d -m 700 /root/.config/shoko-zuordnung && cd /root/.config/shoko-zuordnung
-umask 077
+# Eigener Benutzer, der Dienst läuft nicht als root
+useradd --system --no-create-home --shell /usr/sbin/nologin shoko-zuordnung
+install -d -o shoko-zuordnung -g shoko-zuordnung -m 750 /var/lib/shoko-zuordnung
+
+# Schlüssel (nur root und der Dienst-Benutzer dürfen lesen)
+install -d -o root -g shoko-zuordnung -m 750 /etc/shoko-zuordnung && cd /etc/shoko-zuordnung
 nano shoko-key       # Shoko-API-Schlüssel, z. B. der aus der Shokofin-Konfiguration
 nano jellyfin-key    # Jellyfin-API-Schlüssel (Dashboard → API-Schlüssel), optional
 nano anthropic-key   # Schlüssel von console.anthropic.com
+chown root:shoko-zuordnung *-key && chmod 640 *-key
 
 cp scripts/shoko-zuordnung/shoko-zuordnung.{service,timer} /etc/systemd/system/
 systemctl daemon-reload && systemctl enable --now shoko-zuordnung.timer
@@ -88,7 +98,7 @@ Läuft das Skript nicht direkt auf dem Docker-Host, die Adressen über `SHOKO_UR
 
 ### Erst probieren, dann scharf schalten
 
-Solange es `/root/.config/shoko-zuordnung/scharf` nicht gibt, **schlägt das Skript nur vor**.
+Solange es `/etc/shoko-zuordnung/scharf` nicht gibt, **schlägt das Skript nur vor**.
 Ergebnisse stehen im Journal und in `offen.json`:
 
 ```bash
@@ -96,5 +106,5 @@ journalctl -u shoko-zuordnung.service -n 50
 cat /var/lib/shoko-zuordnung/offen.json
 ```
 
-Passen die Vorschläge, mit `touch /root/.config/shoko-zuordnung/scharf` freischalten. Das
+Passen die Vorschläge, mit `touch /etc/shoko-zuordnung/scharf` freischalten. Das
 Skript ordnet nur zu und liest Serien neu ein – es löscht, verschiebt oder ändert sonst nichts.
