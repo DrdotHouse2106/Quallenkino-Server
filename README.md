@@ -54,11 +54,11 @@ mit Teasern. Ton und Untertitel werden automatisch passend gewählt (Deutsch bev
 
 | Gerät | Download |
 |---|---|
-| Fire TV, Android TV, Google TV | [Quallenkino für Android TV](https://github.com/DrdotHouse2106/Jellyfin-TV-Client/releases/latest) |
+| Fire TV, Android TV, Google TV | [Quallenkino für Android TV](https://github.com/DrdotHouse2106/Quallenkino-AndroidTV/releases/latest) |
 | LG-Fernseher (webOS) | [Quallenkino für webOS](https://github.com/DrdotHouse2106/Quallenkino-webOS/releases/latest) |
 
 Die Empfehlungs- und Live-TV-Reihen brauchen das Server-Plugin
-[Quallenkino](https://github.com/DrdotHouse2106/Lokal-Vorschlag-Jellyfin) (Quallenkinoplugin für Jellyfin, früher „Local Recommendations“/LocalRecs). Mehr dazu und zu
+[Quallenkino](https://github.com/DrdotHouse2106/Quallenkino-Empfehlungen) (Quallenkinoplugin für Jellyfin, früher „Local Recommendations“/LocalRecs). Mehr dazu und zu
 anderen Apps: [docs/09-clients.md](docs/09-clients.md).
 
 ## Schnellstart

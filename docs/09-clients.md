@@ -15,7 +15,7 @@ Eigener Jellyfin-Client mit Kino-Startseite: großer Infobereich mit Trailer,
 Darstellern, „Top 10 bei euch“, Welten (Filmreihen/Studios), Wünschen über Jellyseerr direkt
 aus der App, Bildschirmschoner mit Teasern.
 
-- Android TV / Fire TV: https://github.com/DrdotHouse2106/Jellyfin-TV-Client/releases
+- Android TV / Fire TV: https://github.com/DrdotHouse2106/Quallenkino-AndroidTV/releases
 - LG webOS: https://github.com/DrdotHouse2106/Quallenkino-webOS/releases
 
 Einige Reihen brauchen das Server-Plugin „Quallenkino“ (Quallenkinoplugin für Jellyfin, früher LocalRecs, siehe [02](02-jellyfin.md)).

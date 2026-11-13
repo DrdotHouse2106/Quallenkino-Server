@@ -32,7 +32,7 @@ Dashboard → Plugins → Repositories → **+**. Danach im Katalog installieren
 | Name | URL |
 |---|---|
 | Jellyfin Stable | `https://repo.jellyfin.org/files/plugin/manifest.json` (ist schon da) |
-| DrdotHouse Plugins | `https://raw.githubusercontent.com/DrdotHouse2106/Jellyfin-Plugins/main/manifest.json` |
+| DrdotHouse Plugins | `https://raw.githubusercontent.com/DrdotHouse2106/Quallenkino-Plugins/main/manifest.json` |
 | File Transformation (IAmParadox) | `https://www.iamparadox.dev/jellyfin/plugins/manifest.json` |
 | Jellyfin Enhanced | `https://raw.githubusercontent.com/n00bcodr/jellyfin-plugins/main/12/manifest.json` |
 | Intro Skipper | `https://intro-skipper.org/manifest.json` |
@@ -44,11 +44,11 @@ Dashboard → Plugins → Repositories → **+**. Danach im Katalog installieren
 | Plugin | Repository | Wofür |
 |---|---|---|
 | ★ **File Transformation** | IAmParadox | Grundlage: erlaubt anderen Plugins, die Weboberfläche zu erweitern. **Zuerst installieren.** |
-| ★ **Quallenkino** (Quallenkinoplugin für Jellyfin, früher Local Recommendations / LocalRecs) | DrdotHouse | Empfehlungen „Weil du … geschaut hast“, „Heute im TV für dich“, „Top 10 bei euch“, Welten, Darsteller im Live-TV, Erinnerungen im Kalender, Aufnehmen, „Wer schaut?“ mit Profilbildern, eigener EPG-Anbieter – und die **Startseite im Quallenkino-Stil** für Jellyfin Web und die Handy-Apps. Quellcode: [Lokal-Vorschlag-Jellyfin](https://github.com/DrdotHouse2106/Lokal-Vorschlag-Jellyfin) |
+| ★ **Quallenkino** (Quallenkinoplugin für Jellyfin, früher Local Recommendations / LocalRecs) | DrdotHouse | Empfehlungen „Weil du … geschaut hast“, „Heute im TV für dich“, „Top 10 bei euch“, Welten, Darsteller im Live-TV, Erinnerungen im Kalender, Aufnehmen, „Wer schaut?“ mit Profilbildern, eigener EPG-Anbieter – und die **Startseite im Quallenkino-Stil** für Jellyfin Web und die Handy-Apps. Quellcode: [Lokal-Vorschlag-Jellyfin](https://github.com/DrdotHouse2106/Quallenkino-Empfehlungen) |
 | ★ **Home Screen Sections** | IAmParadox | Zusätzliche Reihen auf der Startseite (Weiterschauen, Kürzlich hinzugefügt, Genres, „Weil du … geschaut hast“). Das Quallenkinoplugin meldet dort seine Reihen an; Quallenkino liest sie auch. |
 | **Plugin Pages** | IAmParadox | Eigene Seiten von Plugins im Benutzermenü (wird von Home Screen Sections genutzt). |
 | **Jellyfin Enhanced** | Jellyfin Enhanced | Qualitäts- und Bewertungs-Abzeichen auf den Kacheln, Zufallsknopf, Pausenbildschirm, Kalender, Lesezeichen, „Wo sonst streamen“, Jellyseerr-Suche. |
-| **Jellyfin Remote** | DrdotHouse | Handy als Fernbedienung für Quallenkino und andere Jellyfin-Apps. Quellcode: [Jellyfin-Remote](https://github.com/DrdotHouse2106/Jellyfin-Remote) |
+| **Jellyfin Remote** | DrdotHouse | Handy als Fernbedienung für Quallenkino und andere Jellyfin-Apps. Quellcode: [Jellyfin-Remote](https://github.com/DrdotHouse2106/Quallenkino-Fernbedienung) |
 | **Intro Skipper** | Intro Skipper | Erkennt Intro, Abspann, Rückblick und Vorschau; „Überspringen“ in allen Apps. |
 | **JellyBridge** | JellyBridge | Verbindet Jellyfin mit Jellyseerr (Wünsche und Entdecken). |
 | **Shoko** (Shokofin) | Shoko | Anime aus Shoko (siehe [04](04-anime.md)). |
@@ -63,7 +63,7 @@ Dashboard → Plugins → Repositories → **+**. Danach im Katalog installieren
 - Reiter *Einstellungen*, Abschnitt *Jellyfin Web*: **„Startseite im Quallenkino-Stil“** und **„Quallenkino-Farben“** einschalten, dazu „Wer schaut?“ und „Profilbilder aus Figuren wählen“.
   Wirkt ohne Neustart; jeder Benutzer kann unten auf der Startseite zur klassischen Ansicht wechseln.
 - Live-TV-Reihe an, Titel z. B. „Heute im TV für dich“; Welten-Liste kommt aus
-  [Jellyfin-Welten](https://github.com/DrdotHouse2106/Jellyfin-Welten) (Voreinstellung).
+  [Jellyfin-Welten](https://github.com/DrdotHouse2106/Quallenkino-Welten) (Voreinstellung).
 - Für die Darsteller im Live-TV die XMLTV-Datei aus [05](05-live-tv.md) eintragen (Reiter *Startseite*, „XMLTV-Quelle für Darsteller“).
 - Reiter *Fernsehprogramm*: eigener EPG-Anbieter „LocalRecs EPG“ statt des XMLTV-Anbieters von Jellyfin (Film/Serie über Regeln statt Filmkategorien, siehe [05](05-live-tv.md)).
 
