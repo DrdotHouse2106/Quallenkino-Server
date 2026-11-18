@@ -48,3 +48,20 @@ Im Heimnetz sollten Apps direkt die lokale Adresse nutzen – über die Domain l
 sonst einmal durchs Internet und zurück.
 
 Nicht ins Internet stellen: die *arr-Dienste, SABnzbd, Prowlarr, m3u-editor, Shoko.
+
+### Docker und die Firewall (ufw)
+
+Ports, die Docker veröffentlicht (`ports:` in der Compose-Datei), **umgehen ufw**: Docker trägt eigene
+iptables-Regeln vor denen von ufw ein. `ufw deny 8989` schützt Sonarr also nicht. Deshalb binden in der
+Vorlage alle Verwaltungsdienste an `BIND_ADDR` aus der `.env` (Standard `127.0.0.1`, für das Heimnetz die
+LAN-Adresse des Servers). Allgemein erreichbar sind nur die Dienste für Zuschauer: Jellyfin, Jellyseerr,
+Navidrome, Audiobookshelf und Kavita. Wer den Server mit öffentlicher Adresse betreibt (gemieteter Server,
+IPv6 ohne Router-Firewall), sollte auch diese nur über VPN oder Reverse Proxy freigeben.
+
+### Images und automatische Updates
+
+Alle Images stehen auf `latest`, `update_docker.sh` holt sonntags neue Versionen. Das ist im Heimbetrieb
+üblich, heißt aber auch: Ein manipuliertes Image käme automatisch auf den Server. Bei kleinen Projekten
+mit wenigen Betreuern (z. B. `lexfi/umlautadaptarrex`, `nandyalu/trailarr`, `sparkison/m3u-editor` und
+`sparkison/m3u-proxy`) kann man die Version festlegen (`image: name:1.2.3` oder `name@sha256:…`) und
+Updates bewusst einspielen. Zurück auf die vorige Version geht mit `update_docker.sh --zurueck <dienst>`.

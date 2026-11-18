@@ -56,7 +56,7 @@ services:
       - ./config/sabnzbd:/config
       - ${DATA_DIR}:/data
     ports:
-      - 8080:8080
+      - "${BIND_ADDR:-127.0.0.1}:8080:8080"
 
   prowlarr:
     <<: *common
@@ -67,7 +67,7 @@ services:
     volumes:
       - ./config/prowlarr:/config
     ports:
-      - 9696:9696
+      - "${BIND_ADDR:-127.0.0.1}:9696:9696"
 
   sonarr:
     <<: *common
@@ -80,7 +80,7 @@ services:
       - ${DATA_DIR}:/data          # Downloads + Medien in EINEM Mount → Hardlinks statt Kopien
       - ${ANIME_DIR}:/anime
     ports:
-      - 8989:8989
+      - "${BIND_ADDR:-127.0.0.1}:8989:8989"
 
   radarr:
     <<: *common
@@ -92,7 +92,7 @@ services:
       - ./config/radarr:/config
       - ${DATA_DIR}:/data
     ports:
-      - 7878:7878
+      - "${BIND_ADDR:-127.0.0.1}:7878:7878"
 
   lidarr:
     <<: *common
@@ -105,7 +105,7 @@ services:
       - ${DATA_DIR}:/data
       - ${MUSIC_DIR}:/music
     ports:
-      - 8686:8686
+      - "${BIND_ADDR:-127.0.0.1}:8686:8686"
 
   # Deutsche Titel/Umlaute für Sonarr/Radarr-Suchen (als Proxy vor Prowlarr)
   umlautadaptarrex:
@@ -120,9 +120,9 @@ services:
     volumes:
       - ./config/umlautadaptarrex:/data
     ports:
-      - 5005:5005
-      - 5006:5006
-      - 5007:5007
+      - "${BIND_ADDR:-127.0.0.1}:5005:5005"
+      - "${BIND_ADDR:-127.0.0.1}:5006:5006"
+      - "${BIND_ADDR:-127.0.0.1}:5007:5007"
 
   # Lokale Trailer (statt YouTube-Streams) für Filme/Serien/Anime
   trailarr:
@@ -138,7 +138,7 @@ services:
       - ${ANIME_DIR}:/anime
       - ${ANIME_TRAILER_DIR}:/anime-trailer
     ports:
-      - 7889:7889
+      - "${BIND_ADDR:-127.0.0.1}:7889:7889"
     mem_limit: 1g
 
   # ───────────── Anime ─────────────
@@ -153,7 +153,7 @@ services:
       - ./config/shoko:/home/shoko/.shoko
       - ${ANIME_DIR}:/anime
     ports:
-      - 8111:8111
+      - "${BIND_ADDR:-127.0.0.1}:8111:8111"
 
   # ───────────── Live-TV ─────────────
   m3u-editor:
@@ -189,7 +189,7 @@ services:
       - ./config/m3u-editor/pgdata:/var/lib/postgresql/data
       - ./config/m3u-editor/storage:/var/www/html/storage/app/public
     ports:
-      - 36400:36400
+      - "${BIND_ADDR:-127.0.0.1}:36400:36400"
     depends_on:
       m3u-proxy:
         condition: service_healthy
@@ -214,7 +214,8 @@ services:
       m3u-redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:38085/health?api_token=${M3U_PROXY_TOKEN}"]
+      # Token als Kopfzeile, nicht in der Adresse (sonst sichtbar in docker inspect und Protokollen)
+      test: ["CMD-SHELL", "curl -fs -o /dev/null -H \"X-API-Token: $$API_TOKEN\" http://127.0.0.1:38085/health"]
       interval: 30s
       timeout: 2s
       retries: 12
@@ -228,7 +229,8 @@ services:
       REDISCLI_AUTH: ${REDIS_PASSWORD}
     volumes:
       - ./config/m3u-editor/redis-data:/data
-    command: redis-server --port 6379 --requirepass ${REDIS_PASSWORD} --appendonly no --save "" --maxmemory 256mb --maxmemory-policy allkeys-lru --loglevel warning
+    # Passwort aus der Umgebung in eine Konfigurationsdatei im Container, nicht auf die Befehlszeile
+    entrypoint: ["sh", "-c", "printf 'requirepass %s\\n' \"$$REDISCLI_AUTH\" > /tmp/redis.conf && exec redis-server /tmp/redis.conf --port 6379 --appendonly no --save \"\" --maxmemory 256mb --maxmemory-policy allkeys-lru --loglevel warning"]
     healthcheck:
       test: ["CMD", "redis-cli", "-p", "6379", "ping"]
       interval: 10s
@@ -304,7 +306,7 @@ services:
       - ./config/suwayomi:/home/suwayomi/.local/share/Tachidesk
       - ${MANGA_DIR}:/home/suwayomi/Downloads
     ports:
-      - 8081:8080
+      - "${BIND_ADDR:-127.0.0.1}:8081:8080"
 
   # YouTube-Kanäle abonnieren und herunterladen
   pinchflat:
@@ -317,4 +319,4 @@ services:
       - ./config/pinchflat:/config
       - ${YOUTUBE_DIR}:/downloads
     ports:
-      - 8945:8945
+      - "${BIND_ADDR:-127.0.0.1}:8945:8945"

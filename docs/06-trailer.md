@@ -4,7 +4,9 @@ Trailarr (7889) liest die Bibliotheken von Radarr und Sonarr und legt passende Y
 als Datei neben Film/Serie (`<Film>/trailers/…`). Jellyfin zeigt sie als lokale Trailer –
 ohne Werbung, ohne YouTube-Sperren, auch auf Geräten ohne YouTube.
 
-1. Erster Login: `admin` / `trailarr` – **Passwort sofort ändern**.
+1. Erster Login: `admin` / `trailarr` – **Passwort sofort ändern** (Einstellungen → Allgemein). Trailarr ist
+   im Heimnetz erreichbar, solange `BIND_ADDR` die LAN-Adresse ist; mit dem Standardpasswort kann dann jedes
+   Gerät im WLAN (auch Gäste) Trailarr bedienen.
 2. Settings → Connections: Radarr und Sonarr (Host `radarr`/`sonarr`, API-Keys).
    Weil alle Container dieselben `/data`-Pfade nutzen, sind keine Pfad-Zuordnungen nötig.
 3. Profile: Sprache/Suchbegriff anpassen, z. B. `{title} {year} trailer deutsch`.
@@ -13,6 +15,6 @@ ohne Werbung, ohne YouTube-Sperren, auch auf Geräten ohne YouTube.
 
 Anime: siehe [04-anime.md](04-anime.md#anime-trailer-optional).
 
-`scripts/anime-trailer/anime_trailer_link.py` nimmt den Jellyfin-API-Schlüssel aus
-`/root/.config/anime-trailer/jellyfin-key` (Dashboard → API-Schlüssel; Pfad über
-`JELLYFIN_KEY_FILE` änderbar).
+`scripts/anime-trailer/anime_trailer_link.py` bekommt den Jellyfin-API-Schlüssel als systemd-Dienst per
+`LoadCredential` aus `/etc/anime-trailer/jellyfin-key` (nur root lesbar, siehe [04-anime.md](04-anime.md#anime-trailer-optional));
+von Hand aufgerufen liest es `JELLYFIN_KEY_FILE`.

@@ -35,6 +35,17 @@ Shokofin die Serien anders schneidet (eine Sonarr-Serie kann in mehrere Shoko-Se
    betroffenen Serien neu einlesen.
 5. Für Serien, die nicht eindeutig sind: Videos von Hand in `manuell.txt` eintragen und mit
    `manuell_laden.sh` laden.
+6. Automatisch (stündlich) als Medien-Benutzer, nicht als root:
+   ```bash
+   install -d -m 700 /etc/anime-trailer
+   install -m 600 /dev/null /etc/anime-trailer/jellyfin-key   # Schlüssel hineinschreiben (Dashboard → API-Schlüssel)
+   chown -R 1000:1000 scripts/anime-trailer
+   cp scripts/anime-trailer/anime-trailer-link.{service,timer} /etc/systemd/system/
+   systemctl daemon-reload && systemctl enable --now anime-trailer-link.timer
+   ```
+   Der Schlüssel bleibt nur für root lesbar; systemd reicht ihn per `LoadCredential` an den Dienst weiter.
+   Pfade aus Trailarr werden über `realpath` gegen den Trailer-Ordner geprüft, Symlinks auf andere
+   Ordner werden nicht verknüpft.
 
 ## Unerkannte Dateien mit Claude zuordnen (optional)
 

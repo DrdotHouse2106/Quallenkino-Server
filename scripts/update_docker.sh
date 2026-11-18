@@ -7,7 +7,10 @@ cd "${STACK_DIR:-/opt/media-stack}" || exit 1
 # NTFY_TOKEN ein Zugriffstoken). Ohne NTFY_URL wird nichts gesendet.
 melden() {
     [ -n "$NTFY_URL" ] || return
-    curl -s -m 15 -o /dev/null ${NTFY_TOKEN:+-H "Authorization: Bearer $NTFY_TOKEN"} \
+    local kopf=()
+    # Token über eine Kopfzeilen-Datei, damit es nicht in der Prozessliste (ps) steht
+    [ -n "$NTFY_TOKEN" ] && kopf=(-H @<(printf 'Authorization: Bearer %s\n' "$NTFY_TOKEN"))
+    curl -s -m 15 -o /dev/null "${kopf[@]}" \
         -H "Title: $1" -H "Priority: 4" -H "Tags: warning" -d "$2" "$NTFY_URL"
 }
 

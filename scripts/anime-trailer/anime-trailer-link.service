@@ -1,0 +1,20 @@
+[Unit]
+Description=Anime-Trailer aus Trailarr ins Shokofin-VFS einhängen
+After=docker.service
+
+[Service]
+Type=oneshot
+# Als Medien-Benutzer (PUID/PGID aus der .env), nicht als root
+User=1000
+Group=1000
+WorkingDirectory=/opt/media-stack/scripts/anime-trailer
+ExecStart=/usr/bin/python3 /opt/media-stack/scripts/anime-trailer/anime_trailer_link.py --apply
+# Jellyfin-API-Schlüssel: liegt nur für root lesbar unter /etc/anime-trailer/jellyfin-key (600)
+LoadCredential=jellyfin-key:/etc/anime-trailer/jellyfin-key
+Nice=10
+IOSchedulingClass=idle
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/media-stack/scripts/anime-trailer /opt/media-stack/config/jellyfin/data/Shokofin/VFS
+ProtectHome=true
+PrivateTmp=true

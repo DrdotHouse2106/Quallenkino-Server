@@ -29,6 +29,9 @@ weniger an.
 
 Dashboard → Plugins → Repositories → **+**. Danach im Katalog installieren und Jellyfin neu starten.
 
+Plugins laufen im Jellyfin-Prozess mit **vollen Rechten des Servers** (Dateien, Datenbank, API-Schlüssel,
+Netz). Nur Quellen eintragen, denen man vertraut, und Plugins nicht wahllos installieren.
+
 | Name | URL |
 |---|---|
 | Jellyfin Stable | `https://repo.jellyfin.org/files/plugin/manifest.json` (ist schon da) |

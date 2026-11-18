@@ -24,7 +24,10 @@ from collections import defaultdict
 STACK = os.environ.get("STACK_DIR", "/opt/media-stack")
 BASE = os.path.join(STACK, "scripts/anime-trailer")
 TRAILARR_DB = os.path.join(STACK, "config/trailarr/trailarr.db")
-JELLYFIN_KEY_FILE = os.environ.get("JELLYFIN_KEY_FILE", "/root/.config/anime-trailer/jellyfin-key")  # Dashboard → API-Schlüssel
+# Jellyfin-API-Schlüssel (Dashboard → API-Schlüssel). Läuft das Skript als systemd-Dienst, kommt er per
+# LoadCredential (siehe anime-trailer-link.service); sonst aus JELLYFIN_KEY_FILE.
+JELLYFIN_KEY_FILE = os.path.join(os.environ["CREDENTIALS_DIRECTORY"], "jellyfin-key") \
+    if os.environ.get("CREDENTIALS_DIRECTORY") else os.environ.get("JELLYFIN_KEY_FILE", "/etc/anime-trailer/jellyfin-key")
 VFS_HOST = os.path.join(STACK, "config/jellyfin/data/Shokofin/VFS")
 VFS_CONTAINER = "/config/data/Shokofin/VFS"
 ANIME_ROOT = os.environ.get("ANIME_ROOT", "/anime/")              # Anime-Ordner, wie Trailarr ihn sieht
@@ -42,6 +45,16 @@ def read_list(name):
         return []
     with open(path, encoding="utf-8") as f:
         return [l.split("#")[0].strip() for l in f if l.split("#")[0].strip()]
+
+
+def unter(pfad, wurzel):
+    """True, wenn pfad (mit aufgelösten Symlinks) wirklich unterhalb von wurzel liegt."""
+    try:
+        echt = os.path.realpath(pfad)
+        w = os.path.realpath(wurzel)
+        return os.path.commonpath([echt, w]) == w and echt != w
+    except ValueError:
+        return False
 
 
 def series_folder(target):
@@ -97,8 +110,9 @@ def trailarr_downloads():
     con.close()
     out = []
     for txdb, title, folder, path, yt, duration, profile in rows:
-        if not path or not path.startswith(TRAILER_ROOT) or not os.path.exists(path):
+        if not path or not unter(path, TRAILER_ROOT) or not os.path.isfile(path):
             continue
+        path = os.path.realpath(path)
         out.append({
             "tvdb": str(txdb), "title": title, "folder": (folder or "").rstrip("/"),
             "path": path, "youtube": yt or "", "duration": duration or 0, "profile": profile,
@@ -173,6 +187,10 @@ def main():
                 continue
             path = os.path.join(TRAILER_ROOT, folder, name)
             line = f"{name} | von Hand | Shoko-ID {sid}"
+            if not unter(path, TRAILER_ROOT) or not os.path.isfile(path):
+                report.append(("MANUELL OHNE TREFFER", line + " (Pfad außerhalb des Trailer-Ordners)", ""))
+                continue
+            path = os.path.realpath(path)
             if show is None:
                 report.append(("MANUELL OHNE TREFFER", line, ""))
                 continue
@@ -199,6 +217,9 @@ def main():
     changed = set()
     for show in vfs_to_src:
         tdir = os.path.join(show, "trailers")
+        if os.path.islink(tdir) or os.path.islink(show) or not unter(show, VFS_HOST):
+            print("Übersprungen (Symlink oder außerhalb des VFS):", show)
+            continue
         want = {os.path.basename(d["path"]): d["path"] for d in plan.get(show, [])}
         # eigene alte Links entfernen, die nicht mehr gewollt sind
         if os.path.isdir(tdir):
@@ -211,10 +232,11 @@ def main():
             p = os.path.join(tdir, name)
             if os.path.islink(p) and os.readlink(p) == target:
                 continue
+            if not unter(target, TRAILER_ROOT):
+                continue
+            # Kein chown: das Skript läuft als Medien-Benutzer (UID 1000), nicht als root
             os.makedirs(tdir, exist_ok=True)
-            os.chown(tdir, 1000, 1000)
             os.symlink(target, p)
-            os.lchown(p, 1000, 1000)
             changed.add(show)
         if os.path.isdir(tdir) and not os.listdir(tdir):
             os.rmdir(tdir)
